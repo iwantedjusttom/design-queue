@@ -29,15 +29,15 @@ There is no local queue file and no folder to sync — **the hopper is GitHub Is
 2. **On "it's ready" / "add it to the hopper":**
    - **a. Bucket analysis** (below) → decide the branch base.
    - **b. Produce the mockup** — a real image or HTML file Tom approved. Commit it to a `design/` (or `mockups/`) folder in the repo on `main`, or attach it to the issue. "Ready" means B has something concrete to match; a vague description isn't a spec.
-   - **c. File the issue:** `gh issue create --title "<feature name>" --body "<the spec>" --label ready`, then place it on the board: `bash /c/Users/iwant/command-center/board-status.sh <repo> #N Ready` (see *The unified board* below).
+   - **c. File the issue:** `gh issue create --title "<feature name>" --body "<the spec>" --label ready`, then place it on the board: `bash /c/Users/iwant/.claude/skills/command-center/board-status.sh <repo> #N Ready` (see *The unified board* below).
    - **d. Confirm to Tom:** "Filed `#N`, labeled `ready`." That's his receipt that it entered the process.
 
 ## Capture at any maturity — the label is the maturity signal
 
 An issue can exist before it's designed. The funnel is `idea → ready → building → in-review → closed`, and the **label** says where it sits. Everything not yet designed lives in one bucket — `idea` — so there's no "is this an idea or a backlog item?" decision to make on capture. The design gate stays intact (nothing skips to `building` without going through *ready*, which only you produce).
 
-- **Instant capture** (Tom says "capture this idea"): `gh issue create --repo <r> --title "Idea: …" --label idea` — one line, no spec required, then `bash /c/Users/iwant/command-center/board-status.sh <repo> #N Idea`.
-- **Promote** when you've designed it — `gh issue edit #N --remove-label idea --add-label ready`, then `bash /c/Users/iwant/command-center/board-status.sh <repo> #N Ready`. From `Ready` on, build-loop owns the card.
+- **Instant capture** (Tom says "capture this idea"): `gh issue create --repo <r> --title "Idea: …" --label idea` — one line, no spec required, then `bash /c/Users/iwant/.claude/skills/command-center/board-status.sh <repo> #N Idea`.
+- **Promote** when you've designed it — `gh issue edit #N --remove-label idea --add-label ready`, then `bash /c/Users/iwant/.claude/skills/command-center/board-status.sh <repo> #N Ready`. From `Ready` on, build-loop owns the card.
 - **Prioritising within `idea`** is by board ordering (drag the ones to design next to the top), not a separate label. We deliberately collapsed the old `backlog` stage into `idea` — don't reintroduce a second pre-design bucket unless real use exposes a genuine need.
 
 ## The unified board
@@ -57,6 +57,9 @@ Tom keeps one cross-repo **Mission Control** board (account-level GitHub Project
   goals(id, team_id → teams, period, target_points, created_at)
   RLS: a team's members read their own goals; only leaders write.
 
+**Approval-gated step:** none
+  ← or: final — deploys preview to Vercel (gate defers; build + tests land first)
+
 **Design notes:** Scoped goals by *period* because the camp runs in discrete weekends.
 Considered one season-long goal but parked it — leaders wanted per-weekend resets.
 ```
@@ -75,6 +78,12 @@ Because B builds several `ready` issues independently off `main`, two features c
 **Foundation-first — the fix for changes-shared.** When two features both need to change the same shared thing, pull that change into **its own issue** and build it *first*. Mark the dependents `Depends on #<foundation>` so they build on top of the landed change instead of fighting over it. The shared change becomes its own feature; the two dependents drop to reads-shared. You sequence the one overlapping piece and keep parallelism for everything else.
 
 Say your confidence plainly when you sort — "certain this only touches goals" vs. "probably isolated, but there may be shared logic I can't see." Low confidence is itself a reason to gate. Never present a guess as a fact.
+
+## Sensitive step last — keep walk-away builds from stranding
+
+The autopilot gate (walk-away) defers a handful of commands — deploys, prod-DB migrations, `npm publish`, external calls, secret-bearing commands. If a feature contains one, **say so in `Approval-gated step` and structure the build so that step is the final, isolated action.** Everything buildable and testable lands first; only the one gated command waits in the queue. That way a walk-away build finishes all the safe work and leaves Tom a clean yes/no — instead of the gate stranding a half-built feature mid-stream.
+
+If the gated step is itself a *foundation* the rest depends on (e.g. a prod migration later code builds on), it isn't "last" — it's a **foundation-first split**: pull it into its own issue so its deferral blocks only itself, not the dependents.
 
 ## Branch base
 
