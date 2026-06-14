@@ -29,20 +29,28 @@ There is no local queue file and no folder to sync — **the hopper is GitHub Is
 2. **On "it's ready" / "add it to the hopper":**
    - **a. Bucket analysis** (below) → decide the branch base.
    - **b. Produce the mockup** — a real image or HTML file Tom approved. Commit it to a `design/` (or `mockups/`) folder in the repo on `main`, or attach it to the issue. "Ready" means B has something concrete to match; a vague description isn't a spec.
-   - **c. File the issue:** `gh issue create --title "<feature name>" --body "<the spec>" --label ready`, then place it on the board: `bash /c/Users/iwant/.claude/skills/command-center/board-status.sh <repo> #N Ready` (see *The unified board* below).
+   - **c. File the issue:** `gh issue create --title "<feature name>" --body "<the spec>"`, then put it in the `ready` stage: `bash /c/Users/iwant/.claude/skills/board-mechanic/pipeline.sh <repo> #N ready` — that one call sets the label *and* slides the board card (see *Stage moves* below).
    - **d. Confirm to Tom:** "Filed `#N`, labeled `ready`." That's his receipt that it entered the process.
 
 ## Capture at any maturity — the label is the maturity signal
 
 An issue can exist before it's designed. The funnel is `idea → ready → building → in-review → closed`, and the **label** says where it sits. Everything not yet designed lives in one bucket — `idea` — so there's no "is this an idea or a backlog item?" decision to make on capture. The design gate stays intact (nothing skips to `building` without going through *ready*, which only you produce).
 
-- **Instant capture** (Tom says "capture this idea"): `gh issue create --repo <r> --title "Idea: …" --label idea` — one line, no spec required, then `bash /c/Users/iwant/.claude/skills/command-center/board-status.sh <repo> #N Idea`.
-- **Promote** when you've designed it — `gh issue edit #N --remove-label idea --add-label ready`, then `bash /c/Users/iwant/.claude/skills/command-center/board-status.sh <repo> #N Ready`. From `Ready` on, build-loop owns the card.
+- **Instant capture** (Tom says "capture this idea"): `gh issue create --repo <r> --title "Idea: …"` — one line, no spec required, then `bash /c/Users/iwant/.claude/skills/board-mechanic/pipeline.sh <repo> #N idea`.
+- **Promote** when you've designed it — `bash /c/Users/iwant/.claude/skills/board-mechanic/pipeline.sh <repo> #N ready` (it swaps the `idea` label for `ready` and slides the card in one call). From `ready` on, build-loop owns the card.
 - **Prioritising within `idea`** is by board ordering (drag the ones to design next to the top), not a separate label. We deliberately collapsed the old `backlog` stage into `idea` — don't reintroduce a second pre-design bucket unless real use exposes a genuine need.
 
-## The unified board
+## Stage moves — one call sets label + board together
 
-Tom keeps one cross-repo **Mission Control** board (account-level GitHub Project #1, `iwantedjusttom`) whose columns mirror these labels: `Idea → Ready → Building → In Review → Closed`. The `board-status.sh <repo> <#> "<Column>"` helper auto-adds the issue and sets its Status; it resolves IDs by name, so a renamed column won't break it. You set the pre-build columns (`Idea`/`Ready`); build-loop takes it from `Building` onward.
+You never touch labels or the Mission Control board directly. To move an issue to a stage, call the pipeline helper:
+
+```
+bash /c/Users/iwant/.claude/skills/board-mechanic/pipeline.sh <repo> #N <stage>
+```
+
+- **Stages you set:** `idea` (capture) and `ready` (the design gate). build-loop takes it from `building` onward.
+- One call does **both halves** — it sets the GitHub label *and* slides the card on the cross-repo Mission Control board (account-level Project #1) — and auto-creates the label if a new repo doesn't have it yet.
+- The label↔column mapping, the board mechanics, and any structural change live in the **board-mechanic** skill, not here. If the board or labels need to change, that's board-mechanic's job — this skill just names a stage.
 
 ## The issue body = the spec
 
@@ -94,8 +102,7 @@ When Tom asks "where are we?", **reconcile before answering**: read the mileston
 
 ## Setup (first time on a repo)
 
-Make sure the status labels exist; create any that don't:
-`gh label create ready` · `gh label create building` · `gh label create in-review`
+Nothing to do for labels or the board — the pipeline helper auto-creates a stage's label the first time it's used on a repo, and the board auto-adds the card. (Onboarding a repo to the board, and any label/column setup, belongs to the **board-mechanic** skill.)
 
 ## Handoff & don't over-build
 
