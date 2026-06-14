@@ -57,9 +57,6 @@ Tom keeps one cross-repo **Mission Control** board (account-level GitHub Project
   goals(id, team_id → teams, period, target_points, created_at)
   RLS: a team's members read their own goals; only leaders write.
 
-**Approval-gated step:** none
-  ← or: final — deploys preview to Vercel (gate defers; build + tests land first)
-
 **Design notes:** Scoped goals by *period* because the camp runs in discrete weekends.
 Considered one season-long goal but parked it — leaders wanted per-weekend resets.
 ```
@@ -77,13 +74,7 @@ Because B builds several `ready` issues independently off `main`, two features c
 
 **Foundation-first — the fix for changes-shared.** When two features both need to change the same shared thing, pull that change into **its own issue** and build it *first*. Mark the dependents `Depends on #<foundation>` so they build on top of the landed change instead of fighting over it. The shared change becomes its own feature; the two dependents drop to reads-shared. You sequence the one overlapping piece and keep parallelism for everything else.
 
-Say your confidence plainly when you sort — "certain this only touches goals" vs. "probably isolated, but there may be shared logic I can't see." Low confidence is itself a reason to gate. Never present a guess as a fact.
-
-## Sensitive step last — keep walk-away builds from stranding
-
-The autopilot gate (walk-away) defers a handful of commands — deploys, prod-DB migrations, `npm publish`, external calls, secret-bearing commands. If a feature contains one, **say so in `Approval-gated step` and structure the build so that step is the final, isolated action.** Everything buildable and testable lands first; only the one gated command waits in the queue. That way a walk-away build finishes all the safe work and leaves Tom a clean yes/no — instead of the gate stranding a half-built feature mid-stream.
-
-If the gated step is itself a *foundation* the rest depends on (e.g. a prod migration later code builds on), it isn't "last" — it's a **foundation-first split**: pull it into its own issue so its deferral blocks only itself, not the dependents.
+Say your confidence plainly when you sort — "certain this only touches goals" vs. "probably isolated, but there may be shared logic I can't see." Low confidence is itself a reason to flag it for review. Never present a guess as a fact.
 
 ## Branch base
 
