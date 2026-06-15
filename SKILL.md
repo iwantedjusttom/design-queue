@@ -52,7 +52,10 @@ There is no local queue file and no folder to sync — **the hopper is GitHub Is
 
 2. **On "design this" / "let's mock this up" — Phase 2, Tom names the issue:**
    - **a. Bucket analysis** (below) → decide the branch base.
-   - **b. Produce the mockup** — a real image or HTML file Tom approved. Commit it to a `design/` (or `mockups/`) folder in the repo on `main`, or attach it to the issue. "Ready" means B has something concrete to match; a vague description isn't a spec.
+   - **b. Produce the mockup** — a real image or HTML file Tom approved. **Every mockup for a feature lives in its own per-issue folder: `mockups/<issue#>-<feature-slug>/`** — e.g. issue #14 "goal tracking" → `mockups/14-goal-tracking/`. Make that folder when you start designing the issue and drop **all** its mockups inside (concept variants, revisions, the final), so a feature's design artifacts stay together and are findable by issue number. Commit the folder to `main`. "Ready" means B has something concrete to match; a vague description isn't a spec.
+     - The folder name is `<issue#>-<short-kebab-slug>` — the issue number first (so it sorts and ties straight to the issue), then a couple of words naming the feature.
+     - This replaces the old "drop loose files in `mockups/`" habit. Don't scatter `mockups/calm-<thing>-mockup.html` files at the top level anymore — they go in the issue's folder. (Pre-existing loose mockups can stay where they are; only organize new ones this way.)
+     - If you genuinely have a mockup before an issue number exists, capture the `idea` issue first to get the number, then name the folder. The whole point is the number-to-feature link.
    - **c. Write the spec onto the issue.** If the feature was already captured as an `idea` issue, **edit that issue's body** into the full spec (`gh issue edit #N --body "<the spec>"`) — don't open a duplicate. If it never got captured, create it now (`gh issue create --title "<feature name>" --body "<the spec>"`) and add it to the board with **no column** (Tom decides where it sits): `bash /c/Users/iwant/.claude/skills/board-mechanic/board-status.sh <repo> #N`. You **never set a stage/label or move a card** — you only guarantee the issue is on the table (see *On the table, never moved* below).
    - **d. Confirm to Tom:** "Spec'd `#N`, mockup attached, on the board — ready for you to mark it `ready`." That's his receipt that it's through design.
 
@@ -103,7 +106,7 @@ _📅 2026-06-15 14:32_
 
 **Branch off:** main          ← or: Depends on #12
 
-**Mockup:** design/14-goal-period.png
+**Mockup:** mockups/14-goal-tracking/  (all mockups for this issue live here)
 
 **Schema (design — B writes the migration):**
   goals(id, team_id → teams, period, target_points, created_at)
