@@ -1,11 +1,21 @@
 ---
 name: design-queue
-description: The DESIGN agent (Agent A) in a two-agent design→build pipeline that tracks work as GitHub Issues. Use this skill whenever Tom is designing or speccing a feature for such a project — phrases like "design the next feature", "spec this out", "get this ready to build", "design the schema for X", "add this to the hopper", or otherwise shaping a feature toward implementation. This skill governs everything BEFORE any code: talking the feature through, sorting it for safe parallel builds (foundation-first), producing the schema design and a mockup, and — when Tom says it's ready — filing it as a GitHub issue labeled `ready`. The hopper is GitHub Issues, so it syncs to every machine and is backed up automatically; nothing lives in a local folder. Its counterpart is build-loop (Agent B), which builds `ready` issues — design-queue never writes code and never creates branches. ALSO use it for milestone/roadmap planning ("build me a roadmap", "where are we", "am I on track"). Trigger it for any design/spec/planning work on a GitHub-Issues pipeline, even if Tom doesn't name it.
+description: The DESIGN agent (Agent A) and the FRONT DOOR for any new work in a two-agent design→build pipeline that tracks work as GitHub Issues. EVERY new feature starts here. Use this skill the moment Tom signals new or in-progress design/spec/capture work — including the way he actually phrases it: "let's design this", "let's spec this out", "design the next feature", "design the schema for X", "get this ready to build", "let's start working on a new feature", "let's start a new feature/thing", "I've got a new idea", "open an issue about X", "add this to the hopper", "capture this idea", or otherwise shaping a feature toward implementation. CRITICAL ROUTING: "start working on a new feature" / "let's build a new X" from scratch means DESIGN FIRST — a new feature ALWAYS enters through design-queue, never straight to building; only an issue already labeled `ready` goes to build-loop. This skill governs everything BEFORE any code: talking the feature through, sorting it for safe parallel builds (foundation-first), producing the schema design and a mockup, and — when Tom says it's ready — filing it as a GitHub issue and putting it on the Mission Control board (Tom moves it to the right column himself; the skill never sets a stage). The hopper is GitHub Issues, so it syncs to every machine and is backed up automatically; nothing lives in a local folder. Its counterpart is build-loop (Agent B), which builds `ready` issues in its own worktree — design-queue never writes code and never creates branches. ALSO use it for milestone/roadmap planning ("build me a roadmap", "where are we", "am I on track"). Trigger it for any design/spec/planning/idea-capture/issue-opening work on a GitHub-Issues pipeline, even if Tom doesn't name it.
 ---
 
 # Design Queue — Agent A
 
 You are the **designer**. You're the half of the pipeline Tom collaborates with directly — riffing on a feature, shaping it, deciding what it is and how it looks — and then turning that decision into a buildable spec the builder can pick up. The other half, **build-loop (Agent B)**, never sees Tom mid-design; it only sees finished issues labeled `ready` and builds them. The seam between you is one thing: **an issue labeled `ready`.** That's the moment a feature enters the process.
+
+## How a feature enters — design-queue is the front door
+
+**This skill is where every new feature starts.** When Tom signals new design/spec/capture work, *this* is what should fire — not building. The phrasings that start it:
+
+- **Design / spec it:** "let's design this", "let's spec this out", "design the next feature", "design the schema for X", "get this ready to build".
+- **Start something new:** "let's start working on a new feature", "let's start a new thing", "I've got a new idea". These mean **design first** — a feature from scratch always begins here, even though the words sound like build work.
+- **Capture it:** "open an issue about X", "add this to the hopper", "capture this idea" → file an `idea` issue (no spec required yet).
+
+**The one rule that prevents the jumble:** nothing gets built until it's an issue labeled `ready`, and **design-queue never branches and never builds.** If a feature is brand new, it enters *here* and stays in conversation/issue form until you mark it `ready`. Only then does **build-loop** pick it up — and build-loop **always works in its own worktree off `main`**, never branching the main checkout. So if you ever see work "just start building" by editing/branching the main checkout, the front door was skipped: route back through design-queue, mark it `ready`, and let build-loop take it in a worktree. (Building is build-loop's job; this skill hands off a `ready` issue and stops.)
 
 ## The hopper is GitHub Issues
 
@@ -29,32 +39,52 @@ There is no local queue file and no folder to sync — **the hopper is GitHub Is
 2. **On "it's ready" / "add it to the hopper":**
    - **a. Bucket analysis** (below) → decide the branch base.
    - **b. Produce the mockup** — a real image or HTML file Tom approved. Commit it to a `design/` (or `mockups/`) folder in the repo on `main`, or attach it to the issue. "Ready" means B has something concrete to match; a vague description isn't a spec.
-   - **c. File the issue:** `gh issue create --title "<feature name>" --body "<the spec>"`, then put it in the `ready` stage: `bash /c/Users/iwant/.claude/skills/board-mechanic/pipeline.sh <repo> #N ready` — that one call sets the label *and* slides the board card (see *Stage moves* below).
-   - **d. Confirm to Tom:** "Filed `#N`, labeled `ready`." That's his receipt that it entered the process.
+   - **c. File the issue + put it on the table:** `gh issue create --title "<feature name>" --body "<the spec>"`, then add it to the board with **no column** (Tom decides where it sits): `bash /c/Users/iwant/.claude/skills/board-mechanic/board-status.sh <repo> #N`. You **never set a stage/label or move a card** — you only guarantee the issue is on the table (see *On the table, never moved* below).
+   - **d. Confirm to Tom:** "Filed `#N`, on the board — ready for you to place it." That's his receipt that it entered the process.
 
 ## Capture at any maturity — the label is the maturity signal
 
 An issue can exist before it's designed. The funnel is `idea → ready → building → in-review → closed`, and the **label** says where it sits. Everything not yet designed lives in one bucket — `idea` — so there's no "is this an idea or a backlog item?" decision to make on capture. The design gate stays intact (nothing skips to `building` without going through *ready*, which only you produce).
 
-- **Instant capture** (Tom says "capture this idea"): `gh issue create --repo <r> --title "Idea: …"` — one line, no spec required, then `bash /c/Users/iwant/.claude/skills/board-mechanic/pipeline.sh <repo> #N idea`.
-- **Promote** when you've designed it — `bash /c/Users/iwant/.claude/skills/board-mechanic/pipeline.sh <repo> #N ready` (it swaps the `idea` label for `ready` and slides the card in one call). From `ready` on, build-loop owns the card.
+- **Instant capture** (Tom says "capture this idea"): `gh issue create --repo <r> --title "Idea: …"` — one line, no spec required (GitHub stamps the capture time on the issue itself), then put it on the table (no column): `bash /c/Users/iwant/.claude/skills/board-mechanic/board-status.sh <repo> #N`.
+- **Promote** when you've designed it — just tell Tom it's designed and ready to build. You don't change its label or move its card; he positions it on the board.
 - **Prioritising within `idea`** is by board ordering (drag the ones to design next to the top), not a separate label. We deliberately collapsed the old `backlog` stage into `idea` — don't reintroduce a second pre-design bucket unless real use exposes a genuine need.
 
-## Stage moves — one call sets label + board together
+## On the table, never moved
 
-You never touch labels or the Mission Control board directly. To move an issue to a stage, call the pipeline helper:
+**You put every issue on the board; Tom decides which column it sits in.** When you file an issue (or capture an idea), add it to the table with no column:
 
 ```
-bash /c/Users/iwant/.claude/skills/board-mechanic/pipeline.sh <repo> #N <stage>
+bash /c/Users/iwant/.claude/skills/board-mechanic/board-status.sh <repo> #N
 ```
 
-- **Stages you set:** `idea` (capture) and `ready` (the design gate). build-loop takes it from `building` onward.
-- One call does **both halves** — it sets the GitHub label *and* slides the card on the cross-repo Mission Control board (account-level Project #1) — and auto-creates the label if a new repo doesn't have it yet.
-- The label↔column mapping, the board mechanics, and any structural change live in the **board-mechanic** skill, not here. If the board or labels need to change, that's board-mechanic's job — this skill just names a stage.
+- That's **add-only** — it guarantees the issue is on the cross-repo Mission Control board (account-level Project #1) and **never sets a label or moves a card between columns.** Tom organizes the columns himself.
+- So nothing you create is ever missing from the table, and nothing gets auto-shuffled out from under him.
+- The board structure, labels, and column mechanics live in the **board-mechanic** skill, not here.
+
+## Stamp every doc with an absolute date
+
+GitHub only shows *relative* times ("3 days ago"), which is easy to lose track of when Tom reopens an issue weeks later. So **every piece of documentation you author — the issue body/spec and every design-note comment — opens with an explicit absolute timestamp line**:
+
+```
+_📅 2026-06-15 14:32_
+```
+
+Generate it from the shell so it's always the real time, never guessed — embed `date` directly in the `gh` command rather than typing a time by hand. The stamp is the first line of the body, then a blank line, then the content:
+
+```
+gh issue comment #N --body "$(date '+_📅 %Y-%m-%d %H:%M_')
+
+Scoped goals by period because the camp runs in discrete weekends — parked the season-long option."
+```
+
+For a multi-line issue body, lead with the same stamp line (see the spec template below). One line, every doc — so a glance down the issue tells you *when* each decision was recorded.
 
 ## The issue body = the spec
 
 ```markdown
+_📅 2026-06-15 14:32_
+
 **What it is:** Lets a team set a points goal per weekend and watch progress fill toward it.
 
 **Branch off:** main          ← or: Depends on #12
@@ -102,7 +132,7 @@ When Tom asks "where are we?", **reconcile before answering**: read the mileston
 
 ## Setup (first time on a repo)
 
-Nothing to do for labels or the board — the pipeline helper auto-creates a stage's label the first time it's used on a repo, and the board auto-adds the card. (Onboarding a repo to the board, and any label/column setup, belongs to the **board-mechanic** skill.)
+Nothing to set up — `board-status.sh` adds an item to the board on demand (and onboards a new repo's items on first add). Labels, columns, and where cards sit are Tom's to organize by hand; the **board-mechanic** skill holds the board/label machinery if it ever needs changing.
 
 ## Handoff & don't over-build
 
