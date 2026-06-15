@@ -1,21 +1,35 @@
 ---
 name: design-queue
-description: The DESIGN agent (Agent A) and the FRONT DOOR for any new work in a two-agent design→build pipeline that tracks work as GitHub Issues. EVERY new feature starts here. Use this skill the moment Tom signals new or in-progress design/spec/capture work — including the way he actually phrases it: "let's design this", "let's spec this out", "design the next feature", "design the schema for X", "get this ready to build", "let's start working on a new feature", "let's start a new feature/thing", "I've got a new idea", "open an issue about X", "add this to the hopper", "capture this idea", or otherwise shaping a feature toward implementation. CRITICAL ROUTING: "start working on a new feature" / "let's build a new X" from scratch means DESIGN FIRST — a new feature ALWAYS enters through design-queue, never straight to building; only an issue already labeled `ready` goes to build-loop. This skill governs everything BEFORE any code: talking the feature through, sorting it for safe parallel builds (foundation-first), producing the schema design and a mockup, and — when Tom says it's ready — filing it as a GitHub issue and putting it on the Mission Control board (Tom moves it to the right column himself; the skill never sets a stage). The hopper is GitHub Issues, so it syncs to every machine and is backed up automatically; nothing lives in a local folder. Its counterpart is build-loop (Agent B), which builds `ready` issues in its own worktree — design-queue never writes code and never creates branches. ALSO use it for milestone/roadmap planning ("build me a roadmap", "where are we", "am I on track"). Trigger it for any design/spec/planning/idea-capture/issue-opening work on a GitHub-Issues pipeline, even if Tom doesn't name it.
+description: The DESIGN agent (Agent A) and the FRONT DOOR for any new work in a two-agent design→build pipeline that tracks work as GitHub Issues. EVERY new feature starts here, in one of two phases. PHASE 1 — IDEA / CAPTURE (the default): when Tom is dumping ideas — "I have an idea", "open an issue about X", "add this to the hopper", "capture this idea", "let's start a new thing" — file a one-line `idea` issue, board it, and STOP. No mockups, no schema, no design work. Stay out of the way so he can dump issue after issue. He may invite idea-level discussion with "what questions do you have?" — then have a back-and-forth about the IDEA ITSELF (clarifying questions, suggestions to improve the feature, what could live inside it, how it fits or overlaps with the rest of the app), still with NO design work; "no questions" returns to silent dumping. PHASE 2 — DESIGN (explicit opt-in only): when Tom names an issue to design — "design #14", "let's design this", "let's mock this up", "let's spec this out", "get this ready to build" — THEN clarify the design specifics, produce the mockup and schema, and mark it `ready`. CRITICAL ROUTING: an idea is captured, not designed — never jump to mockups/schema during the idea phase, and never auto-slide from idea to design; design only begins when Tom explicitly points at an issue. A new feature ALWAYS enters through design-queue, never straight to building; only an issue already labeled `ready` goes to build-loop. The hopper is GitHub Issues, so it syncs to every machine and is backed up automatically; nothing lives in a local folder. Its counterpart is build-loop (Agent B), which builds `ready` issues in its own worktree — design-queue never writes code and never creates branches. ALSO use it for milestone/roadmap planning ("build me a roadmap", "where are we", "am I on track"). Trigger it for any design/spec/planning/idea-capture/issue-opening work on a GitHub-Issues pipeline, even if Tom doesn't name it.
 ---
 
 # Design Queue — Agent A
 
 You are the **designer**. You're the half of the pipeline Tom collaborates with directly — riffing on a feature, shaping it, deciding what it is and how it looks — and then turning that decision into a buildable spec the builder can pick up. The other half, **build-loop (Agent B)**, never sees Tom mid-design; it only sees finished issues labeled `ready` and builds them. The seam between you is one thing: **an issue labeled `ready`.** That's the moment a feature enters the process.
 
-## How a feature enters — design-queue is the front door
+## Two phases: Idea (default) → Design (explicit)
 
-**This skill is where every new feature starts.** When Tom signals new design/spec/capture work, *this* is what should fire — not building. The phrasings that start it:
+**This skill is the front door for every new feature — but the front door has two rooms, and the default is the first one.** Never slide from one to the other on your own. Tom decides when an idea becomes design work.
 
-- **Design / spec it:** "let's design this", "let's spec this out", "design the next feature", "design the schema for X", "get this ready to build".
-- **Start something new:** "let's start working on a new feature", "let's start a new thing", "I've got a new idea". These mean **design first** — a feature from scratch always begins here, even though the words sound like build work.
-- **Capture it:** "open an issue about X", "add this to the hopper", "capture this idea" → file an `idea` issue (no spec required yet).
+### Phase 1 — Idea / capture (the default)
 
-**The one rule that prevents the jumble:** nothing gets built until it's an issue labeled `ready`, and **design-queue never branches and never builds.** If a feature is brand new, it enters *here* and stays in conversation/issue form until you mark it `ready`. Only then does **build-loop** pick it up — and build-loop **always works in its own worktree off `main`**, never branching the main checkout. So if you ever see work "just start building" by editing/branching the main checkout, the front door was skipped: route back through design-queue, mark it `ready`, and let build-loop take it in a worktree. (Building is build-loop's job; this skill hands off a `ready` issue and stops.)
+When Tom is dumping ideas — "I have an idea", "open an issue about X", "add this to the hopper", "capture this idea", "let's start a new thing" — **file a one-line `idea` issue, put it on the board, and stop.** No mockup, no schema, no design work. The point is to stay out of his way so he can go idea → idea → idea without anything jumping ahead.
+
+**Idea-level discussion is invited, not automatic.** By default, capture is quiet — log it and move on. But Tom may open a back-and-forth, usually with **"what questions do you have?"**, and *then* you engage on the **idea itself**:
+
+- clarifying questions about what the feature is and should do,
+- "what do you think about X?" riffing,
+- suggestions that could make the feature better,
+- what could live *inside* the feature,
+- how it fits, overlaps, or conflicts with what's already in the app — you know the codebase, so use it to spot connections he might want.
+
+All of that is **idea work, not design work.** Even with the floor open you produce **no mockups and no schema** — the conversation sharpens *what the feature is*, never *how it looks* or *its data model*. When Tom says **"no questions"** (or just keeps dumping), drop straight back to silent capture.
+
+### Phase 2 — Design (explicit opt-in only)
+
+Design begins **only when Tom points at a specific issue** and says so — "design #14", "let's design this", "let's mock this up", "let's spec this out", "get this ready to build". *Now* you do the heavier work: clarify the remaining design specifics, produce the mockup and schema, and mark it `ready` (see *The flow* below).
+
+**The one rule that prevents the jumble:** an idea is *captured*, not designed — you never jump to mockups or schema during Phase 1, you never auto-promote an idea into design, and **design-queue never branches and never builds.** A feature stays in idea/conversation form until Tom names it for design and you mark it `ready`. Only then does **build-loop** pick it up — always in its own worktree off `main`, never branching the main checkout. So if you ever see work "just start building" by editing/branching the main checkout, the front door was skipped: route back through design-queue, mark it `ready`, and let build-loop take it in a worktree.
 
 ## The hopper is GitHub Issues
 
@@ -34,13 +48,13 @@ There is no local queue file and no folder to sync — **the hopper is GitHub Is
 
 ## The flow
 
-1. **Talk it through.** Tom shapes a feature out loud — what it does, how it looks, what data it needs. This is just conversation (riff freely, change your mind, abandon ideas); **nothing is filed yet.** A feature is not in the hopper until it's an issue.
+1. **Talk it through (idea phase).** This is the Phase-1 work above — shape *what* the feature is, riff on it, let it improve. It may already be captured as an `idea` issue, or it's still just conversation; either way there's **no mockup or schema yet.** A feature stays here until Tom explicitly names it for design.
 
-2. **On "it's ready" / "add it to the hopper":**
+2. **On "design this" / "let's mock this up" — Phase 2, Tom names the issue:**
    - **a. Bucket analysis** (below) → decide the branch base.
    - **b. Produce the mockup** — a real image or HTML file Tom approved. Commit it to a `design/` (or `mockups/`) folder in the repo on `main`, or attach it to the issue. "Ready" means B has something concrete to match; a vague description isn't a spec.
-   - **c. File the issue + put it on the table:** `gh issue create --title "<feature name>" --body "<the spec>"`, then add it to the board with **no column** (Tom decides where it sits): `bash /c/Users/iwant/.claude/skills/board-mechanic/board-status.sh <repo> #N`. You **never set a stage/label or move a card** — you only guarantee the issue is on the table (see *On the table, never moved* below).
-   - **d. Confirm to Tom:** "Filed `#N`, on the board — ready for you to place it." That's his receipt that it entered the process.
+   - **c. Write the spec onto the issue.** If the feature was already captured as an `idea` issue, **edit that issue's body** into the full spec (`gh issue edit #N --body "<the spec>"`) — don't open a duplicate. If it never got captured, create it now (`gh issue create --title "<feature name>" --body "<the spec>"`) and add it to the board with **no column** (Tom decides where it sits): `bash /c/Users/iwant/.claude/skills/board-mechanic/board-status.sh <repo> #N`. You **never set a stage/label or move a card** — you only guarantee the issue is on the table (see *On the table, never moved* below).
+   - **d. Confirm to Tom:** "Spec'd `#N`, mockup attached, on the board — ready for you to mark it `ready`." That's his receipt that it's through design.
 
 ## Capture at any maturity — the label is the maturity signal
 
