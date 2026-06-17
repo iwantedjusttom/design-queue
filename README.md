@@ -2,7 +2,7 @@
 
 The **DESIGN agent (Agent A)** in a two-agent `design → build` pipeline where work is tracked as **GitHub Issues**.
 
-This skill governs everything **before** any code: talking a feature through, sorting it for safe parallel builds (foundation-first), producing the schema design and a mockup, and — when it's ready — filing it as a GitHub issue labeled `ready`. It never writes code and never creates branches.
+This skill governs everything **before** any code: talking a feature through, sorting it for safe parallel builds (foundation-first), producing the schema design and a mockup, and — when it's ready — filing it as a GitHub issue Tom moves into the Ready column. It never writes code and never creates branches.
 
 The hopper is **GitHub Issues**, so it syncs to every machine and is backed up automatically; nothing lives in a local folder.
 
@@ -16,7 +16,7 @@ Any design/spec/planning work on a GitHub-Issues pipeline.
 
 ## Companion
 
-**build-loop** (Agent B) builds the `ready` issues this skill produces. Designing, speccing, sorting for parallel safety, and roadmap/milestones live here — not in build-loop.
+**build-loop** (Agent B) builds the Ready-column issues this skill produces. Designing, speccing, sorting for parallel safety, and roadmap/milestones live here — not in build-loop.
 
 ## Install
 
