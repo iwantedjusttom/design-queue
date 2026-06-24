@@ -117,7 +117,7 @@ _📅 2026-06-15 14:32_
 Considered one season-long goal but parked it — leaders wanted per-weekend resets.
 ```
 
-- **Schema is a *design*, not a migration file.** Describe tables, columns, and RLS. B writes the actual migration and assigns its number (the number depends on build order — a fact you can't know). **RLS on every table** is non-negotiable; a schema without it isn't ready.
+- **Schema is a *design*, not a migration file.** Describe tables, columns, and RLS. B writes the actual migration file; **its number is the issue number** — `<issue#>_<slug>.sql` zero-padded to 4 digits (issue #14 → `0014_public_catalog.sql`), *not* a running sequential counter. You may reference that filename in the spec since the issue number is known at design time. **RLS on every table** is non-negotiable; a schema without it isn't ready.
 - **Design notes carry your reasoning** — the *why* and the parked alternatives — so future-Tom doesn't re-litigate a settled call.
 
 ## Bucket analysis — keep parallel builds safe
