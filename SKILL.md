@@ -35,7 +35,7 @@ Design begins **only when Tom points at a specific issue** and says so — "desi
 
 There is no local queue file and no folder to sync — **the hopper is GitHub Issues on the project's repo.** That means it's already everywhere Tom works, already backed up, with nothing to pull or keep in step.
 
-- **Status is a board column:** Ready → Building → In-review. A **closed** issue is shipped/done. Status lives in the Mission Control board columns Tom organizes by hand — **not** in issue labels.
+- **Status is a board column:** Ready → Building → In-review. A **closed** issue is shipped/done. Status lives in the project board columns Tom organizes by hand — **not** in issue labels.
 - **The issue number is the feature's ID** — GitHub assigns it (`#14`). No manual ID scheme to maintain; the number is the thread that ties the issue to its branch (`feature/14-goal-tracking`), its PR, and its history.
 - **Everything about a feature lives on the issue:** the spec is the issue body; design decisions are issue comments; the shipped record is the closed issue + merged PR.
 
@@ -57,14 +57,14 @@ There is no local queue file and no folder to sync — **the hopper is GitHub Is
      - This replaces the old "drop loose files in `mockups/`" habit. Don't scatter `mockups/calm-<thing>-mockup.html` files at the top level anymore — they go in the issue's folder. (Pre-existing loose mockups can stay where they are; only organize new ones this way.)
      - If you genuinely have a mockup before an issue number exists, capture the issue first to get the number, then name the folder. The whole point is the number-to-feature link.
      - **Watch the `.gitignore`.** A repo that keeps loose mockups local (Sam Camp ignores `mockups/*` and only un-ignores `!mockups/*calm*.html` at the top level) will **silently swallow** a per-issue subfolder — git can't un-ignore a file whose parent dir is excluded, so the folder commits *nothing*. After `git add`, confirm the files actually staged (`git status` shows them, not absent). If they're ignored, re-include the folders first — e.g. add `!mockups/[0-9]*/` and `!mockups/[0-9]*/**` (Sam Camp's `.gitignore` already has this).
-   - **c. Write the spec onto the issue.** If the feature was already captured as an issue, **edit that issue's body** into the full spec (`gh issue edit #N --body "<the spec>"`) — don't open a duplicate. If it never got captured, create it now (`gh issue create --title "<feature name>" --body "<the spec>"`) and add it to the board with **no column** (Tom decides where it sits): `bash /c/Users/iwant/.claude/skills/board-mechanic/board-status.sh <repo> #N`. You **never move a card between columns** — you only guarantee the issue is on the table (see *On the table, never moved* below).
+   - **c. Write the spec onto the issue.** If the feature was already captured as an issue, **edit that issue's body** into the full spec (`gh issue edit #N --body "<the spec>"`) — don't open a duplicate. If it never got captured, create it now (`gh issue create --title "<feature name>" --body "<the spec>"`) and add it to the board with **no column** (Tom decides where it sits): `bash /c/Users/iwant/.claude/skills/design-queue/board-status.sh <repo> #N`. You **never move a card between columns** — you only guarantee the issue is on the table (see *On the table, never moved* below).
    - **d. Confirm to Tom:** "Spec'd `#N`, mockup attached, on the board — ready for you to move it to the Ready column." That's his receipt that it's through design.
 
 ## Capture at any maturity — the board column is the status
 
 An issue can exist before it's designed. The funnel is Idea → Ready → Building → In-review → Closed, and its **board column** says where it sits — not a label. Everything not yet designed sits in one place (the pre-design column) — so there's no "is this an idea or a backlog item?" decision to make on capture. The design gate stays intact (nothing reaches Building without going through Ready, and only you produce the spec Ready requires).
 
-- **Instant capture** (Tom says "capture this idea"): `gh issue create --repo <r> --title "…"` — one line, no spec required and **no label** (GitHub stamps the capture time on the issue itself), then put it on the table (no column): `bash /c/Users/iwant/.claude/skills/board-mechanic/board-status.sh <repo> #N`.
+- **Instant capture** (Tom says "capture this idea"): `gh issue create --repo <r> --title "…"` — one line, no spec required and **no label** (GitHub stamps the capture time on the issue itself), then put it on the table (no column): `bash /c/Users/iwant/.claude/skills/design-queue/board-status.sh <repo> #N`.
 - **Promote** when you've designed it — just tell Tom it's designed and ready to build. You don't move its card between columns; he positions it on the board.
 - **Prioritising before design** is by board ordering (drag the ones to design next to the top). We keep a single pre-design column — don't reintroduce a second pre-design bucket unless real use exposes a genuine need.
 
@@ -73,12 +73,11 @@ An issue can exist before it's designed. The funnel is Idea → Ready → Buildi
 **You put every issue on the board; Tom decides which column it sits in.** When you file an issue (or capture an idea), add it to the table with no column:
 
 ```
-bash /c/Users/iwant/.claude/skills/board-mechanic/board-status.sh <repo> #N
+bash /c/Users/iwant/.claude/skills/design-queue/board-status.sh <repo> #N
 ```
 
-- That's **add-only** — it guarantees the issue is on the cross-repo Mission Control board (account-level Project #1) and **never sets a label or moves a card between columns.** Tom organizes the columns himself.
+- That's **add-only** — it guarantees the issue is on the cross-repo project board (account-level Project #1) and **never sets a label or moves a card between columns.** Tom organizes the columns himself.
 - So nothing you create is ever missing from the table, and nothing gets auto-shuffled out from under him.
-- The board structure, labels, and column mechanics live in the **board-mechanic** skill, not here.
 
 ## Stamp every doc with an absolute date
 
@@ -150,7 +149,7 @@ When Tom asks "where are we?", **reconcile before answering**: read the mileston
 
 ## Setup (first time on a repo)
 
-Nothing to set up — `board-status.sh` adds an item to the board on demand (and onboards a new repo's items on first add). Labels, columns, and where cards sit are Tom's to organize by hand; the **board-mechanic** skill holds the board/label machinery if it ever needs changing.
+Nothing to set up — `board-status.sh` adds an item to the board on demand (and onboards a new repo's items on first add). Labels, columns, and where cards sit are Tom's to organize by hand.
 
 ## Handoff & don't over-build
 
