@@ -35,7 +35,7 @@ Design begins **only when Tom points at a specific issue** and says so — "desi
 
 There is no local queue file and no folder to sync — **the hopper is GitHub Issues on the project's repo.** That means it's already everywhere Tom works, already backed up, with nothing to pull or keep in step.
 
-- **Status is a board column:** Ready → Building → In-review. A **closed** issue is shipped/done. Status lives in the project board columns Tom organizes by hand — **not** in issue labels.
+- **Status is one lane in the project Status field — never a label.** The lane is **Inbox → Shaping → Ready → Building → In-Review → Done**, plus **Icebox** for a good idea that's sleeping (not now). *Inbox* is the raw, unrefined dump; *Shaping* is being designed (mockup + spec in progress); *Ready* is buildable; *Building* is the machine's (building *and* quality-gate proving it); *In-Review* is **Tom's own** review of a proven card, parked for his eyeball + merge; *Done* is shipped. Status lives in that one field Tom organizes by hand — **not** in issue labels. You only **signal** readiness; moving a card up the lane (Inbox → Shaping → Ready) is Tom's judgment call, not yours (see *On the table, never moved*).
 - **The issue number is the feature's ID** — GitHub assigns it (`#14`). No manual ID scheme to maintain; the number is the thread that ties the issue to its branch (`feature/14-goal-tracking`), its PR, and its history.
 - **Everything about a feature lives on the issue:** the spec is the issue body; design decisions are issue comments; the shipped record is the closed issue + merged PR.
 
@@ -57,27 +57,28 @@ There is no local queue file and no folder to sync — **the hopper is GitHub Is
      - This replaces the old "drop loose files in `mockups/`" habit. Don't scatter `mockups/calm-<thing>-mockup.html` files at the top level anymore — they go in the issue's folder. (Pre-existing loose mockups can stay where they are; only organize new ones this way.)
      - If you genuinely have a mockup before an issue number exists, capture the issue first to get the number, then name the folder. The whole point is the number-to-feature link.
      - **Watch the `.gitignore`.** A repo that keeps loose mockups local (Sam Camp ignores `mockups/*` and only un-ignores `!mockups/*calm*.html` at the top level) will **silently swallow** a per-issue subfolder — git can't un-ignore a file whose parent dir is excluded, so the folder commits *nothing*. After `git add`, confirm the files actually staged (`git status` shows them, not absent). If they're ignored, re-include the folders first — e.g. add `!mockups/[0-9]*/` and `!mockups/[0-9]*/**` (Sam Camp's `.gitignore` already has this).
-   - **c. Write the spec onto the issue.** If the feature was already captured as an issue, **edit that issue's body** into the full spec (`gh issue edit #N --body "<the spec>"`) — don't open a duplicate. If it never got captured, create it now (`gh issue create --title "<feature name>" --body "<the spec>"`) and add it to the board with **no column** (Tom decides where it sits): `bash /c/Users/iwant/.claude/skills/design-queue/board-status.sh <repo> #N`. You **never move a card between columns** — you only guarantee the issue is on the table (see *On the table, never moved* below).
+   - **c. Write the spec onto the issue.** The "full spec" means the template below, held to the *Spec quality bar* — testable acceptance boxes, an Out-of-scope list, exact DDL for any schema, and the real `size:` label (Shaping isn't finished without it). If the feature was already captured as an issue, **edit that issue's body** into that spec (`gh issue edit #N --body "<the spec>"`) — don't open a duplicate. If it never got captured, create it now (`gh issue create --title "<feature name>" --body "<the spec>"`) and add it to the board with **no status set** (Tom decides where it sits): `bash /c/Users/iwant/.claude/skills/design-queue/board-status.sh <repo> #N`. You **never move a card up the lane** — you only guarantee the issue is on the table (see *On the table, never moved* below).
    - **d. Confirm to Tom:** "Spec'd `#N`, mockup attached, on the board — ready for you to move it to the Ready column." That's his receipt that it's through design.
 
-## Capture at any maturity — the board column is the status
+## Capture at any maturity — the Status lane says where it sits
 
-An issue can exist before it's designed. The funnel is Idea → Ready → Building → In-review → Closed, and its **board column** says where it sits — not a label. Everything not yet designed sits in one place (the pre-design column) — so there's no "is this an idea or a backlog item?" decision to make on capture. The design gate stays intact (nothing reaches Building without going through Ready, and only you produce the spec Ready requires).
+An issue can exist before it's designed. The funnel is **Inbox → Shaping → Ready → Building → In-Review → Done** (with **Icebox** off to the side for sleeping ideas), and its **Status lane** says where it sits — not a label. Everything not yet designed sits in **Inbox** — so there's no "is this an idea or a backlog item?" decision to make on capture. The design gate stays intact (nothing reaches Building without going through Ready, and only you produce the spec Ready requires).
 
-- **Instant capture** (Tom says "capture this idea"): `gh issue create --repo <r> --title "…"` — one line, no spec required and **no label** (GitHub stamps the capture time on the issue itself), then put it on the table (no column): `bash /c/Users/iwant/.claude/skills/design-queue/board-status.sh <repo> #N`.
-- **Promote** when you've designed it — just tell Tom it's designed and ready to build. You don't move its card between columns; he positions it on the board.
-- **Prioritising before design** is by board ordering (drag the ones to design next to the top). We keep a single pre-design column — don't reintroduce a second pre-design bucket unless real use exposes a genuine need.
+- **Instant capture** (Tom says "capture this idea"): `gh issue create --repo <r> --title "…"` — one line, no spec required (GitHub stamps the capture time on the issue itself). New ideas land in **Inbox** — the raw, unrefined lane that **replaces the old `idea` label**, now retired (it was status wearing a label costume, which is why it rotted onto closed cards). Stamp the `type:`/`area:` labels if they're obvious from the one-liner (a label answers *what is this?*, never its status); skip `size:` — that's earned at Shaping exit. Then put it on the table (no status set): `bash /c/Users/iwant/.claude/skills/design-queue/board-status.sh <repo> #N`.
+- **Promote** when you've designed it — just tell Tom it's designed and ready to build. You don't move its card up the lane; he positions it on the board.
+- **Prioritising before design** is by board ordering (drag the ones to design next to the top). We keep a single pre-design lane (**Inbox**) — don't reintroduce a second pre-design bucket unless real use exposes a genuine need.
 
 ## On the table, never moved
 
-**You put every issue on the board; Tom decides which column it sits in.** When you file an issue (or capture an idea), add it to the table with no column:
+**You put every issue on the board; Tom decides where in the lane it sits.** When you file an issue (or capture an idea), add it to the table with no status set:
 
 ```
 bash /c/Users/iwant/.claude/skills/design-queue/board-status.sh <repo> #N
 ```
 
-- That's **add-only** — it guarantees the issue is on the cross-repo project board (account-level Project #1) and **never sets a label or moves a card between columns.** Tom organizes the columns himself.
+- That's **add-only** — it guarantees the issue is on the cross-repo project board (account-level Project #1) and **never sets a status or moves a card up the lane.** Tom organizes the lane himself.
 - So nothing you create is ever missing from the table, and nothing gets auto-shuffled out from under him.
+- **Why this stays add-only (the resurrection scar).** Two writers once raced on one status field and a late skill write dragged a merged card back to a pre-close lane. The *target* ownership is one writer per transition — Inbox → Shaping → Ready is Tom's, Ready → Building is build-loop's, Building → In-Review is quality-gate's (a gate PASS), In-Review → Done is Tom's (the merge) — but **for now every card is moved by hand.** You only *signal* readiness; that ownership gets promoted one edge at a time later, once the practice is proven. Don't change `board-status.sh`'s behavior.
 
 ## Stamp every doc with an absolute date
 
@@ -99,8 +100,10 @@ For a multi-line issue body, lead with the same stamp line (see the spec templat
 
 ## The issue body = the spec
 
+The body holds **one canonical "Current spec" block at the top** — the latest truth, rewritten in place. Use this template:
+
 ```markdown
-_📅 2026-06-15 14:32_
+_📅 2026-06-15 14:32_   ← stamp; this block is the CURRENT spec, kept rewritten in place
 
 **What it is:** Lets a team set a points goal per weekend and watch progress fill toward it.
 
@@ -108,16 +111,40 @@ _📅 2026-06-15 14:32_
 
 **Mockup:** mockups/14-goal-tracking/  (all mockups for this issue live here)
 
-**Schema (design — B writes the migration):**
-  goals(id, team_id → teams, period, target_points, created_at)
-  RLS: a team's members read their own goals; only leaders write.
+**Schema (design — B writes the migration) — name the exact object, paste the intended DDL:**
+    create table goals (
+      id          uuid primary key default gen_random_uuid(),
+      team_id     uuid not null references teams(id),
+      period      text not null,
+      target_points int not null,
+      created_at  timestamptz not null default now()
+    );
+    -- RLS: a team's members read their own goals; only leaders write.
+
+**Acceptance** (each box an observable true/false — quality-gate proves and ticks these):
+- [ ] A leader can set a target for a weekend; it persists across reload.
+- [ ] A member watches the bar fill toward the target as points land.
+- [ ] A member cannot write a goal — the set-target control is ABSENT from their DOM.
+- [ ] Legacy team with no goal set: the progress tile is absent, no zero-state error.
+
+**Out of scope:** season-long goals; editing a target after the weekend closes; cross-team leaderboards.
 
 **Design notes:** Scoped goals by *period* because the camp runs in discrete weekends.
 Considered one season-long goal but parked it — leaders wanted per-weekend resets.
 ```
 
-- **Schema is a *design*, not a migration file.** Describe tables, columns, and RLS. B writes the actual migration file; **its number is the issue number** — `<issue#>_<slug>.sql` zero-padded to 4 digits (issue #14 → `0014_public_catalog.sql`), *not* a running sequential counter. You may reference that filename in the spec since the issue number is known at design time. **RLS on every table** is non-negotiable; a schema without it isn't ready.
+- **Schema is a *design*, not a migration file — but a *precise* one.** Name the exact object and paste the intended DDL (above); B writes the actual migration file, and **its number is the issue number** — `<issue#>_<slug>.sql` zero-padded to 4 digits (issue #14 → `0014_public_catalog.sql`), *not* a running sequential counter. You may reference that filename in the spec since the issue number is known at design time. **RLS on every table** is non-negotiable; a schema without it isn't ready.
 - **Design notes carry your reasoning** — the *why* and the parked alternatives — so future-Tom doesn't re-litigate a settled call.
+
+## Spec quality bar
+
+The issue body is the one artifact B builds from and quality-gate proves against — so it must read as a *contract*, not a sketch. Five disciplines keep it honest:
+
+- **One canonical "Current spec" block, rewritten in place.** As decisions land, *edit the top block so it reads as the current truth* — never append "Update 2026-06-20…" sections that quietly revise the body above them. The dated chronology belongs in **issue comments** (stamped, see above); the body always reads as the latest spec. B reads the top block, not archaeology. (We've watched a spec grow by accretion until the builder had to reconstruct the real requirement from three contradictory appended sections — don't.)
+- **Acceptance as tickable boxes, each an observable true/false.** Write acceptance as discrete `- [ ]` checkboxes, every one a state you could *observe* and call true or false. **Ban "sensibly / properly / correctly"** — name the actual expected state. Not "legacy / un-scheduled camps behave sensibly" but "legacy camp with no round events: all three tiles open from `start_date`, no due dates shown." These boxes are the contract **quality-gate executes and ticks** — an unticked box means not done, and a card with one can't reach In-Review.
+- **Schema-touching specs paste the exact object and intended DDL.** Don't describe a schema change in prose ("relax the CHECK that forces `round IS NULL`"). Name the **exact object** and paste the **intended DDL**, so review catches drift *before* apply — not after a failed insert in prod. (It's bitten us: an out-of-band object silently rejected an insert the prose spec swore was fine.)
+- **A mandatory "Out of scope" list on every spec.** Name what this feature explicitly does *not* do — the cheapest way to stop scope creep and second-guessing. And encode any removed/hidden requirement as a **positive "must be ABSENT from the DOM" assertion** in Acceptance, not a vague "shouldn't show" — an absence you can test is the only absence that's enforced.
+- **Taxonomy at creation, size at Shaping exit.** Stamp `type:` and `area:` labels when the issue is born (`type:epic|feature|bug|chore`, `area:goals|calendar|hubs|homework|call-room|onboarding|releases` — a label answers *what is this?*, never its status). Assign the real **`size:` (S/M/L) only when Shaping is done**, as a precondition for Ready — at Inbox you understand almost nothing, so an estimate there is wasted twice over (most Inbox cards die). One exception: a coarse, throwaway gut-size at Inbox is fine *only* to spot an obvious quick-win bug worth fast-tracking past full shaping.
 
 ## Bucket analysis — keep parallel builds safe
 
